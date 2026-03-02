@@ -8,6 +8,13 @@ from PIL import Image
 if "image_saved" not in st.session_state:
     st.session_state.image_saved = False
 
+uploaded_file = st.file_uploader(
+    "📤 Bild eines Kleidungsstücks hochladen",
+    type=["jpg", "jpeg", "png"]
+)
+if uploaded_file is not None:
+    st.session_state.image_saved = False
+    
 # =========================
 # STREAMLIT SEITENLAYOUT
 # =========================
@@ -91,24 +98,17 @@ st.markdown('</div>', unsafe_allow_html=True)
 # VERARBEITUNG NACH UPLOAD
 # =========================
 if uploaded_file is not None:
-    st.session_state.image_saved = False
 
-    # =========================
-    # BILD ANZEIGEN
-    # =========================
+    # Bild anzeigen
     st.image(uploaded_file, caption="📷 Hochgeladenes Fundstück", use_column_width=True)
 
-    # =========================
-    # BILD FÜR KI VORBEREITEN
-    # =========================
+    # Bild für KI vorbereiten
     image = Image.open(uploaded_file).convert("RGB")
     image = image.resize((224, 224))
     image_array = np.array(image) / 255.0
     image_array = np.expand_dims(image_array, axis=0)
 
-    # =========================
-    # KI VORHERSAGE
-    # =========================
+    # KI Vorhersage
     predictions = model.predict(image_array)[0]
     best_index = np.argmax(predictions)
     best_label = labels[best_index]
@@ -117,38 +117,33 @@ if uploaded_file is not None:
     st.success(f"✅ Erkannte Kategorie: {best_label} ({best_confidence:.1f} %)")
 
     # =========================
-    # DATEI VORBEREITEN
+    # NUR EINMAL SPEICHERN
     # =========================
-    image_bytes = uploaded_file.getvalue()
-    filename = f"{uuid.uuid4()}.jpg"
+    if not st.session_state.image_saved:
 
-# =========================
-# NUR EINMAL SPEICHERN
-# =========================
-if not st.session_state.image_saved:
+        image_bytes = uploaded_file.getvalue()
+        filename = f"{uuid.uuid4()}.jpg"
 
-    image_bytes = uploaded_file.getvalue()
-    filename = f"{uuid.uuid4()}.jpg"
+        supabase.storage.from_("fundbilder").upload(
+            path=filename,
+            file=image_bytes,
+            file_options={"content-type": "image/jpeg"}
+        )
 
-    supabase.storage.from_("fundbilder").upload(
-        path=filename,
-        file=image_bytes,
-        file_options={"content-type": "image/jpeg"}
-    )
+        image_url = supabase.storage.from_("fundbilder").get_public_url(filename)
 
-    image_url = supabase.storage.from_("fundbilder").get_public_url(filename)
+        supabase.table("fundstuecke").insert({
+            "image_url": image_url,
+            "category": best_label,
+            "confidence": float(best_confidence)
+        }).execute()
 
-    supabase.table("fundstuecke").insert({
-        "image_url": image_url,
-        "category": best_label,
-        "confidence": float(best_confidence)
-    }).execute()
+        st.session_state.image_saved = True
+        st.success("📦 Fundstück wurde gespeichert!")
 
-    st.session_state.image_saved = True
-    st.success("📦 Fundstück wurde gespeichert!")
-else:
-    st.info("ℹ️ Dieses Bild wurde bereits gespeichert.")
-
+    else:
+        st.info("ℹ️ Dieses Bild wurde bereits gespeichert.")
+        
 # =========================
 # FUNDBÜRO DURCHSUCHEN
 # =========================
