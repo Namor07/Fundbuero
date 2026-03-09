@@ -25,36 +25,50 @@ st.set_page_config(
 # =========================
 st.markdown("""
 <style>
-.title {
-    text-align: center;
-    font-size: 40px;
-    font-weight: bold;
-}
-.subtitle {
-    text-align: center;
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 30px;
-}
-.card {
-    background-color: #f7f7f7;
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 20px;
-}
-.result {
-    font-size: 24px;
-    font-weight: bold;
-    color: #2E8B57;
-    text-align: center;
-}
-</style>
 
-<div class="title">🧥 Digitales Fundbüro</div>
-<div class="subtitle">
-Lade ein Bild eines gefundenen Kleidungsstücks hoch<br>
-und lasse es automatisch erkennen
-</div>
+/* Gesamte App schmaler & zentriert */
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    max-width: 900px;
+}
+
+/* Header-Leiste oben entfernen */
+header {visibility: hidden;}
+
+/* Footer entfernen */
+footer {visibility: hidden;}
+
+/* Abstand zwischen Elementen harmonisieren */
+.stMarkdown, .stImage, .stButton, .stSelectbox {
+    margin-bottom: 1rem;
+}
+
+/* Karten-Stil */
+.card {
+    background-color: #f9fafb;
+    padding: 1.2rem;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+/* Ergebnis hervorheben */
+.result {
+    background-color: #ecfeff;
+    border-left: 6px solid #06b6d4;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+/* Überschriften */
+h1, h2, h3 {
+    color: #0f172a;
+}
+
+</style>
 """, unsafe_allow_html=True)
 
 # =========================
