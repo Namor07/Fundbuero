@@ -5,6 +5,9 @@ import uuid
 from supabase import create_client
 from PIL import Image
 
+if "last_uploaded_file" not in st.session_state:
+    st.session_state.last_uploaded_file = None
+
 if "image_saved" not in st.session_state:
     st.session_state.image_saved = False
     
@@ -83,8 +86,15 @@ st.markdown('<div class="card">', unsafe_allow_html=True)
 uploaded_file = st.file_uploader(
     "📤 Bild eines Kleidungsstücks hochladen",
     type=["jpg", "jpeg", "png"],
-    key="fundbild_upload"  # WICHTIG!
+    key="fundbild_upload"
 )
+
+if uploaded_file is not None:
+    current_file_id = (uploaded_file.name, uploaded_file.size)
+
+    if st.session_state.last_uploaded_file != current_file_id:
+        st.session_state.last_uploaded_file = current_file_id
+        st.session_state.image_saved = False
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -96,13 +106,12 @@ if uploaded_file is not None:
     # Bild anzeigen
     st.image(uploaded_file, caption="📷 Hochgeladenes Fundstück", use_column_width=True)
 
-    # Bild für KI vorbereiten
+    # KI-Vorbereitung
     image = Image.open(uploaded_file).convert("RGB")
     image = image.resize((224, 224))
     image_array = np.array(image) / 255.0
     image_array = np.expand_dims(image_array, axis=0)
 
-    # KI Vorhersage
     predictions = model.predict(image_array)[0]
     best_index = np.argmax(predictions)
     best_label = labels[best_index]
@@ -110,6 +119,28 @@ if uploaded_file is not None:
 
     st.success(f"✅ Erkannte Kategorie: {best_label} ({best_confidence:.1f} %)")
 
+    # ⬇️⬇️⬇️ WICHTIG: Upload passiert HIER und NUR HIER
+    if not st.session_state.image_saved:
+
+        image_bytes = uploaded_file.getvalue()
+        filename = f"{uuid.uuid4()}.jpg"
+
+        supabase.storage.from_("fundbilder").upload(
+            path=filename,
+            file=image_bytes,
+            file_options={"content-type": "image/jpeg"}
+        )
+
+        image_url = supabase.storage.from_("fundbilder").get_public_url(filename)
+
+        supabase.table("fundstuecke").insert({
+            "image_url": image_url,
+            "category": best_label,
+            "confidence": float(best_confidence)
+        }).execute()
+
+        st.session_state.image_saved = True
+        st.success("📦 Fundstück wurde gespeichert!")
     # =========================
     # NUR EINMAL SPEICHERN
     # =========================
