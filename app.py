@@ -71,6 +71,12 @@ h1, h2, h3 {
 </style>
 """, unsafe_allow_html=True)
 
+st.title("🧥 Fundbüro – Gefundene Kleidung")
+st.markdown(
+    "Lade ein Bild eines gefundenen Kleidungsstücks hoch. "
+    "Die KI erkennt automatisch die Kategorie und speichert den Fund."
+)
+
 # =========================
 # SUPABASE VERBINDUNG
 # =========================
