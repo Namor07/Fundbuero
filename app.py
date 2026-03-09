@@ -194,7 +194,16 @@ if uploaded_file is not None:
 # =========================
 # FUNDBÜRO DURCHSUCHEN
 # =========================
-st.markdown("## 🔍 Fundstücke durchsuchen")
+st.markdown(f"""
+<div class="result">
+<b>✅ Erkannte Kategorie:</b><br>
+<span style="font-size:1.2rem;">{best_label}</span><br>
+<span style="color:#0369a1;">Sicherheit: {best_confidence:.1f} %</span>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
+st.header("🔍 Gefundene Kleidungsstücke durchsuchen")
 
 # Kategorien aus Labels
 selected_category = st.selectbox(
