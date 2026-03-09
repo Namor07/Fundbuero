@@ -125,21 +125,29 @@ st.markdown('</div>', unsafe_allow_html=True)
 # =========================
 if uploaded_file is not None:
 
-    # Bild anzeigen
-    st.image(uploaded_file, caption="📷 Hochgeladenes Fundstück", use_column_width=True)
-
-    # KI-Vorbereitung
+    # Bild vorbereiten
     image = Image.open(uploaded_file).convert("RGB")
     image = image.resize((224, 224))
     image_array = np.array(image) / 255.0
     image_array = np.expand_dims(image_array, axis=0)
 
+    # KI-Vorhersage
     predictions = model.predict(image_array)[0]
     best_index = np.argmax(predictions)
     best_label = labels[best_index]
     best_confidence = predictions[best_index] * 100
 
-    st.success(f"✅ Erkannte Kategorie: {best_label} ({best_confidence:.1f} %)")
+    # ✅ ERGEBNISANZEIGE MUSS HIER STEHEN
+    st.markdown(
+        f"""
+        <div class="result">
+            <b>✅ Erkannte Kategorie:</b><br>
+            <span style="font-size:1.2rem;">{best_label}</span><br>
+            <span style="color:#0369a1;">Sicherheit: {best_confidence:.1f} %</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # ⬇️⬇️⬇️ WICHTIG: Upload passiert HIER und NUR HIER
     if not st.session_state.image_saved:
@@ -194,16 +202,6 @@ if uploaded_file is not None:
 # =========================
 # FUNDBÜRO DURCHSUCHEN
 # =========================
-st.markdown(
-    f"""
-    <div class="result">
-        <b>✅ Erkannte Kategorie:</b><br>
-        <span style="font-size:1.2rem;">{best_label}</span><br>
-        <span style="color:#0369a1;">Sicherheit: {best_confidence:.1f} %</span>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 st.markdown("---")
 st.header("🔍 Gefundene Kleidungsstücke durchsuchen")
