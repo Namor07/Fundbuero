@@ -184,7 +184,7 @@ if uploaded_file is not None:
             "storage_path": storage_path,
             "category": display_category,   # für Anzeige
             "confidence": float(best_confidence)
-        }).execute()
+            }).execute()
         
         st.session_state.image_saved = True
         st.success("📦 Fundstück wurde gespeichert!")
