@@ -102,7 +102,10 @@ model = load_model()
 
 # Labels laden
 with open("model/labels.txt", "r") as f:
-    labels = [line.strip() for line in f.readlines()]
+    labels = [
+    line.strip().split(" ", 1)[1]
+    for line in f.readlines()
+    ]
 
 # =========================
 # BILD UPLOAD
