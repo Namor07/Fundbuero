@@ -5,6 +5,12 @@ import uuid
 from supabase import create_client
 from PIL import Image
 
+CATEGORY_TO_STORAGE = {
+    "trinkflasche": "trinkflasche",
+    "handschuhe": "handschuhe",
+    "mütze": "muetze"   # ❗ Umlaut entfernt
+}
+
 if "last_uploaded_file" not in st.session_state:
     st.session_state.last_uploaded_file = None
 
@@ -153,8 +159,10 @@ if uploaded_file is not None:
     if not st.session_state.image_saved:
 
         image_bytes = uploaded_file.getvalue()
-        safe_category = best_label.lower()
-        storage_path = f"{safe_category}/{uuid.uuid4()}.jpg"
+        display_category = best_label.lower()
+        storage_category = CATEGORY_TO_STORAGE.get(display_category)
+
+        storage_path = f"{storage_category}/{uuid.uuid4()}.jpg"
         
         supabase.storage.from_("fundbilder").upload(
             path=storage_path,
@@ -167,10 +175,10 @@ if uploaded_file is not None:
         supabase.table("fundstuecke").insert({
             "image_url": image_url,
             "storage_path": storage_path,
-             "category": safe_category,
-             "confidence": float(best_confidence)
-         }).execute()
-
+            "category": display_category,   # für Anzeige
+            "confidence": float(best_confidence)
+        }).execute()
+        
         st.session_state.image_saved = True
         st.success("📦 Fundstück wurde gespeichert!")
     # =========================
