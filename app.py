@@ -153,21 +153,23 @@ if uploaded_file is not None:
     if not st.session_state.image_saved:
 
         image_bytes = uploaded_file.getvalue()
-        filename = f"{uuid.uuid4()}.jpg"
-
+        safe_category = best_label.lower()
+        storage_path = f"{safe_category}/{uuid.uuid4()}.jpg"
+        
         supabase.storage.from_("fundbilder").upload(
-            path=filename,
+            path=storage_path,
             file=image_bytes,
             file_options={"content-type": "image/jpeg"}
         )
-
-        image_url = supabase.storage.from_("fundbilder").get_public_url(filename)
+        
+        image_url = supabase.storage.from_("fundbilder").get_public_url(storage_path)
 
         supabase.table("fundstuecke").insert({
             "image_url": image_url,
-            "category": best_label,
-            "confidence": float(best_confidence)
-        }).execute()
+            "storage_path": storage_path,
+             "category": safe_category,
+             "confidence": float(best_confidence)
+         }).execute()
 
         st.session_state.image_saved = True
         st.success("📦 Fundstück wurde gespeichert!")
