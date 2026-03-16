@@ -6,9 +6,9 @@ from supabase import create_client
 from PIL import Image
 
 CATEGORY_TO_STORAGE = {
-    "trinkflasche": "trinkflasche",
-    "handschuhe": "handschuhe",
-    "mütze": "muetze"   # ❗ Umlaut entfernt
+    "Trinkflasche": "trinkflasche",
+    "Handschuhe": "handschuhe",
+    "Mütze": "muetze"   # ❗ Umlaut entfernt
 }
 
 if "last_uploaded_file" not in st.session_state:
